@@ -1,0 +1,2 @@
+provider:
+  image: quay.io/metal3-io/cluster-api-provider-baremetal:master
