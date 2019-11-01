@@ -73,8 +73,15 @@ spec:
           name: https
       - args:
         - --metrics-addr=127.0.0.1:8080
+        {{- if eq .Values.capi.version "v1alpa2" }}
+        - --enable-leader-election
+        {{- end }}
         command:
+        {{- if eq .Values.capi.version "v1alpa1" }}
         - /machine-controller-manager
+        {{- else if eq .Values.capi.version "v1alpa2" }}
+        - /manager
+        {{- end }}
         env:
         - name: POD_NAMESPACE
           valueFrom:
@@ -145,7 +152,15 @@ spec:
       containers:
       - command:
         - /manager
+        {{- if .Values.capi.image }}
+        image: {{ .Values.capi.image }}
+        {{- else }}
+          {{- if eq .Values.capi.version "v1alpa1" }}
         image: gcr.io/k8s-cluster-api/cluster-api-controller:latest
+          {{- else if eq .Values.capi.version "v1alpa2" }}
+        image: gcr.io/k8s-staging-cluster-api/cluster-api-controller:release-0.2
+          {{- end }}
+        {{- end }}
         name: manager
         resources:
           limits:

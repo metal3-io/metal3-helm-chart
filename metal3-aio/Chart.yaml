@@ -1,4 +1,0 @@
-apiVersion: v1
-name: metal3-aio
-description: Metal3 + ironic
-version: 0.1.0
