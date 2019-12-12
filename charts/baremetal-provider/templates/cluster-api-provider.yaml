@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cluster-api-provider-baremetal-webhook-server-secret
+  name: capbm-webhook-server-secret
 
 ---
 apiVersion: v1
@@ -15,7 +15,7 @@ metadata:
   labels:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
-  name: cluster-api-provider-baremetal-controller-manager-metrics-svc
+  name: capbm-controller-manager-metrics-svc
 spec:
   ports:
   - name: https
@@ -32,7 +32,7 @@ metadata:
   labels:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
-  name: cluster-api-provider-baremetal-controller-manager-service
+  name: capbm-controller-manager-service
 spec:
   ports:
   - port: 443
@@ -47,13 +47,13 @@ metadata:
   labels:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
-  name: cluster-api-provider-baremetal-controller-manager
+  name: capbm-controller-manager
 spec:
   selector:
     matchLabels:
       control-plane: controller-manager
       controller-tools.k8s.io: "1.0"
-  serviceName: cluster-api-provider-baremetal-controller-manager-service
+  serviceName: capbm-controller-manager-service
   template:
     metadata:
       labels:
@@ -88,7 +88,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: SECRET_NAME
-          value: cluster-api-provider-baremetal-webhook-server-secret
+          value: capbm-webhook-server-secret
         image: {{ .Values.provider.image }}
         imagePullPolicy: Always
         name: manager
@@ -112,5 +112,5 @@ spec:
       - name: cert
         secret:
           defaultMode: 420
-          secretName: cluster-api-provider-baremetal-webhook-server-secret
+          secretName: capbm-webhook-server-secret
 

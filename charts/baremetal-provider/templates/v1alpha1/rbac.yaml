@@ -4,7 +4,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: cluster-api-provider-baremetal-manager-role
+  name: capbm-manager-role
 rules:
 - apiGroups:
   - cluster.k8s.io
@@ -105,7 +105,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: cluster-api-provider-baremetal-proxy-role
+  name: capbm-proxy-role
 rules:
 - apiGroups:
   - authentication.k8s.io
@@ -125,11 +125,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   creationTimestamp: null
-  name: cluster-api-provider-baremetal-manager-rolebinding
+  name: capbm-manager-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-api-provider-baremetal-manager-role
+  name: capbm-manager-role
 subjects:
 - kind: ServiceAccount
   name: default
@@ -139,11 +139,11 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cluster-api-provider-baremetal-proxy-rolebinding
+  name: capbm-proxy-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-api-provider-baremetal-proxy-role
+  name: capbm-proxy-role
 subjects:
 - kind: ServiceAccount
   name: default
