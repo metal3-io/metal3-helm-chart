@@ -73,13 +73,13 @@ spec:
           name: https
       - args:
         - --metrics-addr=127.0.0.1:8080
-        {{- if eq .Values.capi.version "v1alpa2" }}
+        {{- if eq .Values.capi.version "v1alpha2" }}
         - --enable-leader-election
         {{- end }}
         command:
-        {{- if eq .Values.capi.version "v1alpa1" }}
+        {{- if eq .Values.capi.version "v1alpha1" }}
         - /machine-controller-manager
-        {{- else if eq .Values.capi.version "v1alpa2" }}
+        {{- else if eq .Values.capi.version "v1alpha2" }}
         - /manager
         {{- end }}
         env:
@@ -155,9 +155,9 @@ spec:
         {{- if .Values.capi.image }}
         image: {{ .Values.capi.image }}
         {{- else }}
-          {{- if eq .Values.capi.version "v1alpa1" }}
+          {{- if eq .Values.capi.version "v1alpha1" }}
         image: gcr.io/k8s-cluster-api/cluster-api-controller:latest
-          {{- else if eq .Values.capi.version "v1alpa2" }}
+          {{- else if eq .Values.capi.version "v1alpha2" }}
         image: gcr.io/k8s-staging-cluster-api/cluster-api-controller:release-0.2
           {{- end }}
         {{- end }}
