@@ -1,4 +1,2 @@
-capi:
+cluster-api:
   version: v1alpha2
-  image: ""
-

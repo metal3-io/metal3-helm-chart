@@ -1,3 +1,2 @@
-capi:
-  version: v1alpha2
-  image: ""
+version: v1alpha2
+image: ""
