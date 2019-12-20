@@ -9,4 +9,4 @@
   {{ end }}
 {{ end }}
 
-{{ include "cluster-api.manager" $image }}
+{{ tuple $image .Values.namespace | include "cluster-api.manager" }}

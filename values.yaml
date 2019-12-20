@@ -1,5 +1,6 @@
 cluster-api:
   version: v1alpha2
+  namespace: default
 baremetal-provider:
   version: "v1alpha2"
   image: "quay.io/metal3-io/cluster-api-provider-baremetal:v1alpha2"

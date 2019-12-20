@@ -1,5 +1,6 @@
 {{- define "cluster-api.manager" }}
-{{ $image:= . }}
+{{ $image:= index . 0 }}
+{{ $namespace:= index . 1 }}
 ---
 apiVersion: v1
 kind: Service
@@ -8,6 +9,7 @@ metadata:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
   name: cluster-api-controller-manager-service
+  namespace: {{ $namespace }}
 spec:
   ports:
   - port: 443
@@ -22,6 +24,7 @@ metadata:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
   name: cluster-api-controller-manager
+  namespace: {{ $namespace }}
 spec:
   selector:
     matchLabels:
