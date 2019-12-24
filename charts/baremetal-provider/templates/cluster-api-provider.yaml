@@ -9,4 +9,4 @@
    {{ $command = "- /manager" }}
 {{ end }}
 
-{{ tuple $arg $command $image | include "capibm.manager" }}
+{{ tuple $arg $command $image .Values.namespace | include "capibm.manager" }}

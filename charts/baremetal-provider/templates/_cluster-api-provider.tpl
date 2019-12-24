@@ -2,12 +2,13 @@
 {{ $arg := index . 0 }}
 {{ $command := index . 1 }}
 {{ $image := index . 2 }}
+{{ $namespace:= index . 3 }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: capbm-webhook-server-secret
-
+  namespace: {{ $namespace }}
 ---
 apiVersion: v1
 kind: Service
@@ -20,6 +21,7 @@ metadata:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
   name: capbm-controller-manager-metrics-svc
+  namespace: {{ $namespace }}
 spec:
   ports:
   - name: https
@@ -37,6 +39,7 @@ metadata:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
   name: capbm-controller-manager-service
+  namespace: {{ $namespace }}
 spec:
   ports:
   - port: 443
@@ -52,6 +55,7 @@ metadata:
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
   name: capbm-controller-manager
+  namespace: {{ $namespace }}
 spec:
   selector:
     matchLabels:
