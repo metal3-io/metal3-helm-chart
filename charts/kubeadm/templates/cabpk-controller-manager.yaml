@@ -1,4 +1,4 @@
 {{ if eq .Values.version "v1alpha2" }}
-{{ include "cabpk-controller.manager" . }}
+{{ tuple .Values.namespace | include "cabpk-controller.manager" }}
 {{ end }}
 

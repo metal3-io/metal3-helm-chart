@@ -7,3 +7,4 @@ baremetal-provider:
   namespace: default
 kubeadm:
   version: "v1alpha2"
+  namespace: default

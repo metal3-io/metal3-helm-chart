@@ -1,4 +1,5 @@
 {{- define "cabpk-controller.manager" }}
+{{ $namespace:= index . 0 }}
 ---
 apiVersion: v1
 kind: Service
@@ -10,7 +11,7 @@ metadata:
   labels:
     control-plane: cabpk-controller-manager
   name: cabpk-controller-manager-metrics-service
-  namespace: default
+  namespace: {{ $namespace }}
 spec:
   ports:
   - name: https
@@ -25,7 +26,7 @@ metadata:
   labels:
     control-plane: cabpk-controller-manager
   name: cabpk-controller-manager
-  namespace: default
+  namespace: {{ $namespace }}
 spec:
   replicas: 1
   selector:
