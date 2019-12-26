@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: metal3-baremetal-operator
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: 1
   selector:
@@ -41,4 +42,3 @@ spec:
               value: {{ .Values.operator.ironic_api_url }}
             - name: IRONIC_INSPECTOR_ENDPOINT
               value: "{{ .Values.operator.ironic_inspector_url }}"
-

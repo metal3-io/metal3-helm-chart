@@ -1,3 +1,5 @@
+namespace: "metal3"
+
 operator:
   ironic_api_url: "http://172.22.0.1:6385/v1/"
   ironic_inspector_url: "http://172.22.0.1:5050/v1/"

@@ -5,6 +5,7 @@ metadata:
   name: ironic-pv-volume
   labels:
     type: local
+  namespace: {{ .Values.namespace }}
 spec:
   storageClassName: default
   capacity:
@@ -19,6 +20,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: ironic-pv-claim
+  namespace: {{ .Values.namespace }}
 spec:
   storageClassName: default
   accessModes:

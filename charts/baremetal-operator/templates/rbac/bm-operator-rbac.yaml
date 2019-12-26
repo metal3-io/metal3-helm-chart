@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: metal3-baremetal-operator
+  namespace: {{ .Values.namespace }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -10,6 +11,7 @@ kind: Role
 metadata:
   creationTimestamp: null
   name: metal3-baremetal-operator
+  namespace: {{ .Values.namespace }}
 rules:
 - apiGroups:
   - ""
@@ -57,10 +59,11 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: metal3-baremetal-operator
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.namespace }}
 subjects:
 - kind: ServiceAccount
   name: metal3-baremetal-operator
+  namespace: {{ .Values.namespace }}
 - kind: User
   name: developer
 roleRef:

@@ -8,3 +8,5 @@ baremetal-provider:
 kubeadm:
   version: "v1alpha2"
   namespace: default
+baremetal-operator:
+  namespace: default
