@@ -7,39 +7,30 @@ metadata:
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   creationTimestamp: null
   name: metal3-baremetal-operator
-  namespace: {{ .Values.namespace }}
 rules:
 - apiGroups:
   - ""
   resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
-  - events
   - configmaps
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - events
   - secrets
   verbs:
-  - '*'
+  - "*"
 - apiGroups:
   - ""
   resources:
   - namespaces
   verbs:
   - get
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  - daemonsets
-  - replicasets
-  - statefulsets
-  verbs:
-  - '*'
 - apiGroups:
   - monitoring.coreos.com
   resources:
@@ -50,16 +41,29 @@ rules:
 - apiGroups:
   - metal3.io
   resources:
-  - '*'
+  - baremetalhosts
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - metal3.io
+  resources:
+  - baremetalhosts/status
+  verbs:
+  - get
+  - patch
+  - update
 
 ---
-kind: RoleBinding
+kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: metal3-baremetal-operator
-  namespace: {{ .Values.namespace }}
 subjects:
 - kind: ServiceAccount
   name: metal3-baremetal-operator
@@ -67,6 +71,6 @@ subjects:
 - kind: User
   name: developer
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: metal3-baremetal-operator
   apiGroup: rbac.authorization.k8s.io
