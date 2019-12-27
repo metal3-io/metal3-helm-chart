@@ -1,0 +1,12 @@
+{{ $arg := "" }}
+{{ $command := "" }}
+{{ $image := .Values.image }}
+
+{{ if eq .Values.version "v1alpha1" }}
+   {{ $command = "- /machine-controller-manager" }}
+{{ else if eq .Values.version "v1alpha2" }}
+   {{ $arg =  "- --enable-leader-election" }}
+   {{ $command = "- /manager" }}
+{{ end }}
+
+{{ tuple $arg $command $image .Values.namespace | include "capibm.manager" }}

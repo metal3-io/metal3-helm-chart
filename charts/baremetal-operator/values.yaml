@@ -1,0 +1,24 @@
+namespace: "metal3"
+
+operator:
+  ironic_api_url: "http://172.22.0.1:6385/v1/"
+  ironic_inspector_url: "http://172.22.0.1:5050/v1/"
+  deploy_kernel_url: "http://172.22.0.1/images/ironic-python-agent.kernel"
+  deploy_ramdisk_url: "http://172.22.0.1/images/ironic-python-agent.initramfs"
+  image: "quay.io/metal3-io/baremetal-operator:latest"
+
+ironic:
+  replicaCount: 1
+  images:
+    ironic_aio: "quay.io/metal3-io/ironic:latest"
+    ironic_inspector: "quay.io/metal3-io/ironic-inspector:latest"
+  ironic_conf:
+    provisioning_interface: "provisioning"
+    dnsmasq_except_interface: "lo"
+    http_port: "80"
+    dhcp_range: "172.22.0.10,172.22.0.100"
+    mariadb_password: "e8ca990d79d351eacda0"
+  ironic_storage:
+    volume_capacity: 10Gi
+    hostPath: "/opt/metal3-dev-env/ironic/"
+  nodeSelector: {}

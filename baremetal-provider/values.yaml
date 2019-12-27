@@ -1,5 +1,0 @@
-capi:
-  version: v1alpha2
-  image: ""
-provider:
-  image: quay.io/metal3-io/cluster-api-provider-baremetal:v1alpha2

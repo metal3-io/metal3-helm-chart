@@ -1,0 +1,12 @@
+{{$image := "" }}
+{{ if .Values.image }}
+  {{ $image =  .Values.image }}
+{{else }}
+  {{ if eq .Values.version "v1alpha1" }}
+     {{ $image = "gcr.io/k8s-cluster-api/cluster-api-controller:latest" }}
+  {{ else if eq .Values.version "v1alpha2" }}
+     {{ $image = "gcr.io/k8s-staging-cluster-api/cluster-api-controller:release-0.2" }}
+  {{ end }}
+{{ end }}
+
+{{ tuple $image .Values.namespace | include "cluster-api.manager" }}
