@@ -1,8 +1,6 @@
 namespace: "metal3"
 
 operator:
-  ironic_api_url: "http://172.22.0.1:6385/v1/"
-  ironic_inspector_url: "http://172.22.0.1:5050/v1/"
   deploy_kernel_path: "/images/ironic-python-agent.kernel"
   deploy_ramdisk_path: "/images/ironic-python-agent.initramfs"
   image: "quay.io/metal3-io/baremetal-operator:latest"

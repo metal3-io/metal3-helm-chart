@@ -39,9 +39,9 @@ spec:
             - name: DEPLOY_RAMDISK_URL
               value: "http://{{- .Values.ironic.configuration.provisioning_ip }}/{{- .Values.operator.deploy_ramdisk_path }}"
             - name: IRONIC_ENDPOINT
-              value: "{{ .Values.operator.ironic_api_url }}"
+              value: "http://{{- .Values.ironic.configuration.provisioning_ip }}:6385/v1/"
             - name: IRONIC_INSPECTOR_ENDPOINT
-              value: "{{ .Values.operator.ironic_inspector_url }}"
+              value: "http://{{- .Values.ironic.configuration.provisioning_ip }}:5050/v1/"
         # Temporary workaround to talk to an external Ironic process until Ironic is running in this pod.
         - name: ironic-proxy
           image: alpine/socat
