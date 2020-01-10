@@ -24,6 +24,7 @@ ironic:
     fast_track: true
   config_override:
     ironic: false
+    inspector: false
   ironic_storage:
     volume_capacity: 10Gi
     hostPath: "/opt/metal3-dev-env/ironic/"
