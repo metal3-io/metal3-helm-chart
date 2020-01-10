@@ -31,13 +31,13 @@ spec:
             privileged: true
           env:
             - name: PROVISIONING_INTERFACE
-              value: {{ .Values.ironic.ironic_conf.provisioning_interface }}
+              value: {{ .Values.ironic.configuration.provisioning_interface }}
             - name: HTTP_PORT
-              value: {{ .Values.ironic.ironic_conf.http_port | quote }}
+              value: {{ .Values.ironic.configuration.http_port | quote }}
             - name: DHCP_RANGE
-              value: {{ .Values.ironic.ironic_conf.dhcp_range }}
+              value: {{ .Values.ironic.configuration.dhcp_range }}
             - name: DNSMASQ_EXCEPT_INTERFACE
-              value: {{ .Values.ironic.ironic_conf.dnsmasq_except_interface }}
+              value: {{ .Values.ironic.configuration.dnsmasq_except_interface }}
           volumeMounts:
               - mountPath: "/shared"
                 name: ironic-storage
@@ -48,9 +48,9 @@ spec:
             privileged: true
           env:
             - name: PROVISIONING_INTERFACE
-              value: {{ .Values.ironic.ironic_conf.provisioning_interface }}
+              value: {{ .Values.ironic.configuration.provisioning_interface }}
             - name: HTTP_PORT
-              value: {{ .Values.ironic.ironic_conf.http_port | quote }}
+              value: {{ .Values.ironic.configuration.http_port | quote }}
           volumeMounts:
               - mountPath: "/shared"
                 name: ironic-storage
@@ -61,9 +61,9 @@ spec:
             privileged: true
           env:
             - name: MARIADB_PASSWORD
-              value: {{ .Values.ironic.ironic_conf.mariadb_password }}
+              value: {{ .Values.ironic.configuration.mariadb_password }}
             - name: PROVISIONING_INTERFACE
-              value: {{ .Values.ironic.ironic_conf.provisioning_interface }}
+              value: {{ .Values.ironic.configuration.provisioning_interface }}
           volumeMounts:
             - mountPath: "/shared"
               name: ironic-storage
@@ -76,11 +76,11 @@ spec:
             privileged: true
           env:
             - name: MARIADB_PASSWORD
-              value: {{ .Values.ironic.ironic_conf.mariadb_password }}
+              value: {{ .Values.ironic.configuration.mariadb_password }}
             - name: PROVISIONING_INTERFACE
-              value: {{ .Values.ironic.ironic_conf.provisioning_interface }}
+              value: {{ .Values.ironic.configuration.provisioning_interface }}
             - name: HTTP_PORT
-              value: {{ .Values.ironic.ironic_conf.http_port | quote }}
+              value: {{ .Values.ironic.configuration.http_port | quote }}
           volumeMounts:
             - mountPath: "/shared"
               name: ironic-storage
@@ -90,7 +90,7 @@ spec:
             privileged: true
           env:
             - name: PROVISIONING_INTERFACE
-              value: {{ .Values.ironic.ironic_conf.provisioning_interface }}
+              value: {{ .Values.ironic.configuration.provisioning_interface }}
           volumeMounts:
             - mountPath: "/shared"
               name: ironic-storage

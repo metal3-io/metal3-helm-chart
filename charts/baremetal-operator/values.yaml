@@ -12,7 +12,7 @@ ironic:
   images:
     ironic_aio: "quay.io/metal3-io/ironic:latest"
     ironic_inspector: "quay.io/metal3-io/ironic-inspector:latest"
-  ironic_conf:
+  configuration:
     provisioning_interface: "provisioning"
     dnsmasq_except_interface: "lo"
     http_port: "80"

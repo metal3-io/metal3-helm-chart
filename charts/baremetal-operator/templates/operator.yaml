@@ -39,7 +39,7 @@ spec:
             - name: DEPLOY_RAMDISK_URL
               value: "{{ .Values.operator.deploy_ramdisk_url }}"
             - name: IRONIC_ENDPOINT
-              value: {{ .Values.operator.ironic_api_url }}
+              value: "{{ .Values.operator.ironic_api_url }}"
             - name: IRONIC_INSPECTOR_ENDPOINT
               value: "{{ .Values.operator.ironic_inspector_url }}"
         # Temporary workaround to talk to an external Ironic process until Ironic is running in this pod.
