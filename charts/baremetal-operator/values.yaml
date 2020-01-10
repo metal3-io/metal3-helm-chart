@@ -3,7 +3,9 @@ namespace: "metal3"
 operator:
   deploy_kernel_path: "/images/ironic-python-agent.kernel"
   deploy_ramdisk_path: "/images/ironic-python-agent.initramfs"
-  image: "quay.io/metal3-io/baremetal-operator:latest"
+  image:
+    fullName: "quay.io/metal3-io/baremetal-operator:latest"
+    pullPolicy: IfNotPresent
 
 ironic:
   replicaCount: 1

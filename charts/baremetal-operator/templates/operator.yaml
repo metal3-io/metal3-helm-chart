@@ -16,7 +16,8 @@ spec:
       serviceAccountName: metal3-baremetal-operator
       containers:
         - name: baremetal-operator
-          image: {{ .Values.operator.image }}
+          image: {{ .Values.operator.image.fullName }}
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
           ports:
           - containerPort: 60000
             name: metrics
