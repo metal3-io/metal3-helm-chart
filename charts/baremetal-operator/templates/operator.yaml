@@ -37,7 +37,7 @@ spec:
             - name: DEPLOY_KERNEL_URL
               value: "http://{{- .Values.ironic.configuration.provisioning_ip }}/{{- .Values.operator.deploy_kernel_path }}"
             - name: DEPLOY_RAMDISK_URL
-              value: "{{ .Values.operator.deploy_ramdisk_url }}"
+              value: "http://{{- .Values.ironic.configuration.provisioning_ip }}/{{- .Values.operator.deploy_ramdisk_path }}"
             - name: IRONIC_ENDPOINT
               value: "{{ .Values.operator.ironic_api_url }}"
             - name: IRONIC_INSPECTOR_ENDPOINT
