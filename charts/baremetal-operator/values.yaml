@@ -3,7 +3,7 @@ namespace: "metal3"
 operator:
   ironic_api_url: "http://172.22.0.1:6385/v1/"
   ironic_inspector_url: "http://172.22.0.1:5050/v1/"
-  deploy_kernel_url: "http://172.22.0.1/images/ironic-python-agent.kernel"
+  deploy_kernel_path: "/images/ironic-python-agent.kernel"
   deploy_ramdisk_url: "http://172.22.0.1/images/ironic-python-agent.initramfs"
   image: "quay.io/metal3-io/baremetal-operator:latest"
 
@@ -14,6 +14,7 @@ ironic:
     ironic_inspector: "quay.io/metal3-io/ironic-inspector:latest"
   configuration:
     provisioning_interface: "provisioning"
+    provisioning_ip: "172.22.0.1"
     dnsmasq_except_interface: "lo"
     http_port: "80"
     dhcp_range: "172.22.0.10,172.22.0.100"

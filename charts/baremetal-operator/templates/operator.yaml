@@ -35,7 +35,7 @@ spec:
             - name: OPERATOR_NAME
               value: "baremetal-operator"
             - name: DEPLOY_KERNEL_URL
-              value: "{{ .Values.operator.deploy_kernel_url }}"
+              value: "http://{{- .Values.ironic.configuration.provisioning_ip }}/{{- .Values.operator.deploy_kernel_path }}"
             - name: DEPLOY_RAMDISK_URL
               value: "{{ .Values.operator.deploy_ramdisk_url }}"
             - name: IRONIC_ENDPOINT
