@@ -29,6 +29,7 @@ ironic:
     dnsmasq: false
     dualboot_ipxe: false
     httpd: false
+    inspector_ipxe: false
   ironic_storage:
     volume_capacity: 10Gi
     hostPath: "/opt/metal3-dev-env/ironic/"
