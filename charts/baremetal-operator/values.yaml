@@ -17,14 +17,16 @@ ironic:
     provisioning_ip: "172.22.0.1"
     automated_clean: true
     api_workers: '4'
-    dnsmasq_except_interface: "lo"
+    dnsmasq_except_interface: lo
     http_port: "80"
     dhcp_range: "172.22.0.10,172.22.0.100"
     mariadb_password: "e8ca990d79d351eacda0"
     fast_track: true
+    ipv: "4"
   config_override:
     ironic: false
     inspector: false
+    dnsmasq: false
   ironic_storage:
     volume_capacity: 10Gi
     hostPath: "/opt/metal3-dev-env/ironic/"
