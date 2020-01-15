@@ -19,6 +19,12 @@ spec:
         - name: ironic-storage
           persistentVolumeClaim:
            claimName: ironic-pv-claim
+        {{- if .Values.ironic.config_override.dnsmasq }}
+        - name: dnsmasq-entrypoint
+          configMap:
+            name: dnsmasq-entrypoint
+            defaultMode: 0700
+        {{- end }}
       {{- with .Values.ironic.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -41,6 +47,11 @@ spec:
           volumeMounts:
               - mountPath: "/shared"
                 name: ironic-storage
+              {{- if .Values.ironic.config_override.dnsmasq }}
+              - name: dnsmasq-entrypoint
+                mountPath: /bin/rundnsmasq
+                subPath: rundnsmasq.sh
+              {{- end }}
         - name: httpd
           image: {{ .Values.ironic.images.ironic_aio }}
           command: ["/bin/runhttpd"]
