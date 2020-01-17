@@ -62,6 +62,10 @@ spec:
           configMap:
             name: inspector-entrypoint
             defaultMode: 0700
+        - name: inspector-config
+          configMap:
+            name: inspector-config
+            defaultMode: 0700
         {{- end }}
       {{- with .Values.ironic.nodeSelector }}
       nodeSelector:
@@ -177,5 +181,8 @@ spec:
             - name: inspector-entrypoint
               mountPath: /bin/runironic-inspector
               subPath: runironic-inspector.sh
+            - name: inspector-config
+              mountPath: /cfg/inspector.conf
+              subPath: inspector.conf
             {{- end }}
 

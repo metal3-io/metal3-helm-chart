@@ -12,10 +12,14 @@ rm -rf /shared/log/ironic-inspector
 
 mkdir -p /shared/log/ironic-inspector
 
-cp $CONFIG $CONFIG.orig
+if [ -f /cfg/inspector.conf ]; then
+    cp -f /cfg/inspector.conf /etc/ironic-inspector/inspector.conf
+else
+    cp $CONFIG $CONFIG.orig
 
-crudini --set $CONFIG ironic endpoint_override http://$IRONIC_URL_HOST:6385
-crudini --set $CONFIG service_catalog endpoint_override http://$IRONIC_URL_HOST:5050
+    crudini --set $CONFIG ironic endpoint_override http://$IRONIC_URL_HOST:6385
+    crudini --set $CONFIG service_catalog endpoint_override http://$IRONIC_URL_HOST:5050
+fi
 
 exec /usr/bin/ironic-inspector --config-file /etc/ironic-inspector/inspector-dist.conf \
 	--config-file /etc/ironic-inspector/inspector.conf \
