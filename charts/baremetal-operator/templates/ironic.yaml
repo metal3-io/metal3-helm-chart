@@ -31,6 +31,12 @@ spec:
             name: httpd-entrypoint
             defaultMode: 0700
         {{- end }}
+        {{- if .Values.ironic.config_override.mariadb }}
+        - name: mariadb-entrypoint
+          configMap:
+            name: mariadb-entrypoint
+            defaultMode: 0700
+        {{- end }}
       {{- with .Values.ironic.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -92,6 +98,11 @@ spec:
             - mountPath: "/var/lib/mysql"
               name: ironic-storage
               subPath: mysql
+              {{- if .Values.ironic.config_override.mariadb }}
+            - name: mariadb-entrypoint
+              mountPath: /bin/runmariadb
+              subPath: runmariadb.sh
+              {{- end }}
         - name: ironic
           image: {{ .Values.ironic.images.ironic_aio }}
           securityContext:
