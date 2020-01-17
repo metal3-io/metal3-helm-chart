@@ -15,7 +15,7 @@ cp /tmp/inspector.ipxe /shared/html/inspector.ipxe
 cp /tmp/dualboot.ipxe /shared/html/dualboot.ipxe
 cp /tmp/uefi_esp.img /shared/html/uefi_esp.img
 
-if [ -f /cfg/inspector.ipxe]; then
+if [ -f /cfg/inspector.ipxe ]; then
     cp -f /cfg/inspector.ipxe /shared/html/inspector.ipxe
 else
     # Use configured values

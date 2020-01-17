@@ -39,6 +39,12 @@ spec:
             name: httpd-config
             defaultMode: 0700
         {{- end }}
+        {{- if .Values.ironic.config_override.inspector_ipxe }}
+        - name: inspector-ipxe-config
+          configMap:
+            name: inspector-ipxe-config
+            defaultMode: 0644
+        {{- end }}
         {{- if .Values.ironic.config_override.mariadb }}
         - name: mariadb-entrypoint
           configMap:
@@ -100,13 +106,20 @@ spec:
           volumeMounts:
               - mountPath: "/shared"
                 name: ironic-storage
-              {{- if .Values.ironic.config_override.httpd }}
+              {{- if or .Values.ironic.config_override.httpd .Values.ironic.config_override.inspector_ipxe }}
               - name: httpd-entrypoint
                 mountPath: /bin/runhttpd
                 subPath: runhttpd.sh
+              {{- end }}
+              {{- if .Values.ironic.config_override.httpd }}
               - name: httpd-config
                 mountPath: /cfg/httpd.conf
                 subPath: httpd.conf
+              {{- end }}
+              {{- if .Values.ironic.config_override.inspector_ipxe }}
+              - name: inspector-ipxe-config
+                mountPath: /cfg/inspector.ipxe
+                subPath: inspector.ipxe
               {{- end }}
         - name: mariadb
           image: {{ .Values.ironic.images.ironic_aio }}
