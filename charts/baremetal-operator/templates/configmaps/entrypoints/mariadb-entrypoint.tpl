@@ -8,11 +8,14 @@ MARIADB_CONF_FILE="/etc/my.cnf.d/mariadb-server.cnf"
 ln -sf /proc/self/fd/1 /var/log/mariadb/mariadb.log
 
 if [ ! -d "${DATADIR}/mysql" ]; then
-    crudini --set "$MARIADB_CONF_FILE" mysqld max_connections 64
-    crudini --set "$MARIADB_CONF_FILE" mysqld max_heap_table_size 1M
-    crudini --set "$MARIADB_CONF_FILE" mysqld innodb_buffer_pool_size 5M
-    crudini --set "$MARIADB_CONF_FILE" mysqld innodb_log_buffer_size 512K
-
+    if [ -f /cfg/my.cnf ]; then
+        cp -f /cfg/my.cnf $MARIADB_CONF_FILE
+    else
+        crudini --set "$MARIADB_CONF_FILE" mysqld max_connections 64
+        crudini --set "$MARIADB_CONF_FILE" mysqld max_heap_table_size 1M
+        crudini --set "$MARIADB_CONF_FILE" mysqld innodb_buffer_pool_size 5M
+        crudini --set "$MARIADB_CONF_FILE" mysqld innodb_log_buffer_size 512K
+    fi
     mysql_install_db --datadir="$DATADIR"
 
     chown -R mysql "$DATADIR"

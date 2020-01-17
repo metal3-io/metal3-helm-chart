@@ -50,6 +50,10 @@ spec:
           configMap:
             name: mariadb-entrypoint
             defaultMode: 0700
+        - name: mariadb-config
+          configMap:
+            name: mariadb-config
+            defaultMode: 0700
         {{- end }}
         {{- if .Values.ironic.config_override.ironic }}
         - name: ironic-entrypoint
@@ -149,6 +153,9 @@ spec:
             - name: mariadb-entrypoint
               mountPath: /bin/runmariadb
               subPath: runmariadb.sh
+            - name: mariadb-config
+              mountPath: /cfg/my.cnf
+              subPath: my.cnf
               {{- end }}
         - name: ironic
           image: {{ .Values.ironic.images.ironic_aio }}
