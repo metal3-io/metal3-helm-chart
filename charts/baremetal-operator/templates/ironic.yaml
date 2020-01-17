@@ -43,6 +43,12 @@ spec:
             name: ironic-entrypoint
             defaultMode: 0700
         {{- end }}
+        {{- if .Values.ironic.config_override.inspector }}
+        - name: inspector-entrypoint
+          configMap:
+            name: inspector-entrypoint
+            defaultMode: 0700
+        {{- end }}
       {{- with .Values.ironic.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -131,6 +137,7 @@ spec:
             {{- end }}
         - name: ironic-inspector
           image: {{ .Values.ironic.images.ironic_inspector }}
+          command: ["/bin/runironic-inspector"]
           securityContext:
             privileged: true
           env:
@@ -139,3 +146,9 @@ spec:
           volumeMounts:
             - mountPath: "/shared"
               name: ironic-storage
+            {{- if .Values.ironic.config_override.inspector }}
+            - name: inspector-entrypoint
+              mountPath: /bin/runironic-inspector
+              subPath: runironic-inspector.sh
+            {{- end }}
+
