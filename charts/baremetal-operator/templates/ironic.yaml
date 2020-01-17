@@ -25,6 +25,12 @@ spec:
             name: dnsmasq-entrypoint
             defaultMode: 0700
         {{- end }}
+        {{- if .Values.ironic.config_override.httpd }}
+        - name: httpd-entrypoint
+          configMap:
+            name: httpd-entrypoint
+            defaultMode: 0700
+        {{- end }}
       {{- with .Values.ironic.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -65,6 +71,11 @@ spec:
           volumeMounts:
               - mountPath: "/shared"
                 name: ironic-storage
+              {{- if .Values.ironic.config_override.httpd }}
+              - name: httpd-entrypoint
+                mountPath: /bin/runhttpd
+                subPath: runhttpd.sh
+              {{- end }}
         - name: mariadb
           image: {{ .Values.ironic.images.ironic_aio }}
           command: ["/bin/runmariadb"]
