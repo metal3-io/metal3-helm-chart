@@ -34,6 +34,10 @@ spec:
           configMap:
             name: httpd-entrypoint
             defaultMode: 0700
+        - name: httpd-config
+          configMap:
+            name: httpd-config
+            defaultMode: 0700
         {{- end }}
         {{- if .Values.ironic.config_override.mariadb }}
         - name: mariadb-entrypoint
@@ -100,6 +104,9 @@ spec:
               - name: httpd-entrypoint
                 mountPath: /bin/runhttpd
                 subPath: runhttpd.sh
+              - name: httpd-config
+                mountPath: /cfg/httpd.conf
+                subPath: httpd.conf
               {{- end }}
         - name: mariadb
           image: {{ .Values.ironic.images.ironic_aio }}
