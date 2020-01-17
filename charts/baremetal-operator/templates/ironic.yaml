@@ -56,6 +56,10 @@ spec:
           configMap:
             name: ironic-entrypoint
             defaultMode: 0700
+        - name: ironic-config
+          configMap:
+            name: ironic-config
+            defaultMode: 0700
         {{- end }}
         {{- if .Values.ironic.config_override.inspector }}
         - name: inspector-entrypoint
@@ -165,6 +169,9 @@ spec:
             - name: ironic-entrypoint
               mountPath: /bin/runironic
               subPath: runironic.sh
+            - name: ironic-config
+              mountPath: /cfg/ironic.conf
+              subPath: ironic.conf
             {{- end }}
         - name: ironic-inspector
           image: {{ .Values.ironic.images.ironic_inspector }}
