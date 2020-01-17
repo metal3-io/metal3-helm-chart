@@ -24,6 +24,10 @@ spec:
           configMap:
             name: dnsmasq-entrypoint
             defaultMode: 0700
+        - name: dnsmasq-config
+          configMap:
+            name: dnsmasq-config
+            defaultMode: 0700
         {{- end }}
         {{- if .Values.ironic.config_override.httpd }}
         - name: httpd-entrypoint
@@ -75,6 +79,9 @@ spec:
               - name: dnsmasq-entrypoint
                 mountPath: /bin/rundnsmasq
                 subPath: rundnsmasq.sh
+              - name: dnsmasq-config
+                mountPath: /cfg/dnsmasq.conf
+                subPath: dnsmasq.conf
               {{- end }}
         - name: httpd
           image: {{ .Values.ironic.images.ironic_aio }}
