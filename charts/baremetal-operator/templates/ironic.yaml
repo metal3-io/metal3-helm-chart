@@ -75,6 +75,12 @@ spec:
             name: inspector-config
             defaultMode: 0700
         {{- end }}
+        {{- if .Values.ironic.config_override.dualboot_ipxe }}
+        - name: dualboot-ipxe-config
+          configMap:
+            name: dualboot-ipxe-config
+            defaultMode: 0644
+        {{- end }}
       {{- with .Values.ironic.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -132,6 +138,11 @@ spec:
               - name: inspector-ipxe-config
                 mountPath: /cfg/inspector.ipxe
                 subPath: inspector.ipxe
+              {{- end }}
+              {{- if .Values.ironic.config_override.dualboot_ipxe }}
+              - name: dualboot-ipxe-config
+                mountPath: /tmp/dualboot.ipxe
+                subPath: dualboot.ipxe
               {{- end }}
         - name: mariadb
           image: {{ .Values.ironic.images.ironic_aio }}
