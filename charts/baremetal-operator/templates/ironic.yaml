@@ -81,6 +81,8 @@ spec:
               value: {{ .Values.ironic.ironic_conf.provisioning_interface }}
             - name: HTTP_PORT
               value: {{ .Values.ironic.ironic_conf.http_port | quote }}
+            - name: IRONIC_FAST_TRACK
+              value: "{{ .Values.ironic.ironic_conf.ironic_fast_track }}"
           volumeMounts:
             - mountPath: "/shared"
               name: ironic-storage

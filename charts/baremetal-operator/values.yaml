@@ -18,6 +18,7 @@ ironic:
     http_port: "80"
     dhcp_range: "172.22.0.10,172.22.0.100"
     mariadb_password: "e8ca990d79d351eacda0"
+    ironic_fast_track: "false"
   ironic_storage:
     volume_capacity: 10Gi
     hostPath: "/opt/metal3-dev-env/ironic/"
