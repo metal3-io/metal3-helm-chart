@@ -30,7 +30,7 @@ send_sensor_data_interval = 160
 api_url = http://{{ .Values.ironic.configuration.provisioning_ip }}:6385
 bootloader = http://{{ .Values.ironic.configuration.provisioning_ip }}:{{ .Values.ironic.configuration.http_port }}/uefi_esp.img
 [database]
-connection = mysql+pymysql://ironic:{{- .Values.ironic.configuration.mariadb_password }}@localhost/ironic?charset=utf8
+connection = mysql+pymysql://ironic:{{- .Values.mariadb.password }}@localhost/ironic?charset=utf8
 [deploy]
 default_boot_option = local
 erase_devices_metadata_priority = 10

@@ -20,7 +20,6 @@ ironic:
     dnsmasq_except_interface: lo
     http_port: "80"
     dhcp_range: "172.22.0.10,172.22.0.100"
-    mariadb_password: "e8ca990d79d351eacda0"
     fast_track: true
     ipv: "4"
   config_override:
@@ -40,3 +39,9 @@ ironic_inspector:
   image:
     fullName: "quay.io/metal3-io/ironic-inspector:latest"
     pullPolicy: IfNotPresent
+
+mariadb:
+  image:
+    fullName: "quay.io/metal3-io/ironic:latest"
+    pullPolicy: IfNotPresent
+  password: "e8ca990d79d351eacda0"

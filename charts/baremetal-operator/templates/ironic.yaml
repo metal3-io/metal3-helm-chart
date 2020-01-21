@@ -145,13 +145,13 @@ spec:
                 subPath: dualboot.ipxe
               {{- end }}
         - name: mariadb
-          image: {{ .Values.ironic.image.fullName }}
+          image: {{ .Values.mariadb.image.fullName }}
           command: ["/bin/runmariadb"]
           securityContext:
             privileged: true
           env:
             - name: MARIADB_PASSWORD
-              value: {{ .Values.ironic.configuration.mariadb_password }}
+              value: {{ .Values.mariadb.password }}
             - name: PROVISIONING_INTERFACE
               value: {{ .Values.ironic.configuration.provisioning_interface }}
           volumeMounts:
@@ -175,7 +175,7 @@ spec:
             privileged: true
           env:
             - name: MARIADB_PASSWORD
-              value: {{ .Values.ironic.configuration.mariadb_password }}
+              value: {{ .Values.mariadb.password }}
             - name: PROVISIONING_INTERFACE
               value: {{ .Values.ironic.configuration.provisioning_interface }}
             - name: HTTP_PORT
