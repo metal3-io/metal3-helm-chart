@@ -112,7 +112,7 @@ spec:
                 subPath: dnsmasq.conf
               {{- end }}
         - name: httpd
-          image: {{ .Values.ironic.image.fullName }}
+          image: {{ .Values.httpd.image.fullName }}
           command: ["/bin/runhttpd"]
           securityContext:
             privileged: true

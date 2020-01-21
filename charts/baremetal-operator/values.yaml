@@ -50,3 +50,8 @@ dnsmasq:
     pullPolicy: IfNotPresent
   dhcp_range: "172.22.0.10,172.22.0.100"
   except_interface: lo
+
+httpd:
+  image:
+    fullName: "quay.io/metal3-io/ironic:latest"
+    pullPolicy: IfNotPresent
