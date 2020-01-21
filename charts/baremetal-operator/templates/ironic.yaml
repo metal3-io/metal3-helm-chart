@@ -87,7 +87,7 @@ spec:
       {{- end }}
       containers:
         - name: dnsmasq
-          image: {{ .Values.ironic.image.fullName }}
+          image: {{ .Values.dnsmasq.image.fullName }}
           command: ["/bin/rundnsmasq"]
           securityContext:
             privileged: true
@@ -97,9 +97,9 @@ spec:
             - name: HTTP_PORT
               value: {{ .Values.ironic.configuration.http_port | quote }}
             - name: DHCP_RANGE
-              value: {{ .Values.ironic.configuration.dhcp_range }}
+              value: {{ .Values.dnsmasq.dhcp_range }}
             - name: DNSMASQ_EXCEPT_INTERFACE
-              value: {{ .Values.ironic.configuration.dnsmasq_except_interface }}
+              value: {{ .Values.dnsmasq.except_interface | quote }}
           volumeMounts:
               - mountPath: "/shared"
                 name: ironic-storage

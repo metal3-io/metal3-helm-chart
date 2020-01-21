@@ -17,9 +17,7 @@ ironic:
     provisioning_ip: "172.22.0.1"
     automated_clean: true
     api_workers: '4'
-    dnsmasq_except_interface: lo
     http_port: "80"
-    dhcp_range: "172.22.0.10,172.22.0.100"
     fast_track: true
     ipv: "4"
   config_override:
@@ -45,3 +43,10 @@ mariadb:
     fullName: "quay.io/metal3-io/ironic:latest"
     pullPolicy: IfNotPresent
   password: "e8ca990d79d351eacda0"
+
+dnsmasq:
+  image:
+    fullName: "quay.io/metal3-io/ironic:latest"
+    pullPolicy: IfNotPresent
+  dhcp_range: "172.22.0.10,172.22.0.100"
+  except_interface: lo

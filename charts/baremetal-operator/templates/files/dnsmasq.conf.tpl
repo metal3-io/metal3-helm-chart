@@ -9,7 +9,7 @@ tftp-root=/shared/tftpboot
 # Disable listening for DNS
 port=0
 
-dhcp-range={{ .Values.ironic.configuration.dhcp_range }}
+dhcp-range={{ .Values.dnsmasq.dhcp_range }}
 
 # Disable default router(s) and DNS over provisioning network
 dhcp-option=3
@@ -42,7 +42,7 @@ dhcp-option=tag:pxe6,option6:bootfile-url,tftp://{{ .Values.ironic.configuration
 dhcp-option=tag:ipxe6,option6:bootfile-url,http://{{ .Values.ironic.configuration.provisioning_ip }}:{{ .Values.ironic.configuration.http_port }}/dualboot.ipxe
 {{- end }}
 
-{{- range $iface := split "," .Values.ironic.configuration.dnsmasq_except_interface }}
+{{- range $iface := split "," .Values.dnsmasq.except_interface }}
 except-interface={{- $iface }}
 {{- end }}
 
