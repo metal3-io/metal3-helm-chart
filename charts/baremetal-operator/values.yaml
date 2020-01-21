@@ -9,9 +9,9 @@ operator:
 
 ironic:
   replicaCount: 1
-  images:
-    ironic_aio: "quay.io/metal3-io/ironic:latest"
-    ironic_inspector: "quay.io/metal3-io/ironic-inspector:latest"
+  image:
+    fullName: "quay.io/metal3-io/ironic:latest"
+    pullPolicy: IfNotPresent
   configuration:
     provisioning_interface: "provisioning"
     provisioning_ip: "172.22.0.1"
@@ -35,3 +35,8 @@ ironic:
     volume_capacity: 10Gi
     hostPath: "/opt/metal3-dev-env/ironic/"
   nodeSelector: {}
+
+ironic_inspector:
+  image:
+    fullName: "quay.io/metal3-io/ironic-inspector:latest"
+    pullPolicy: IfNotPresent

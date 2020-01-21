@@ -87,7 +87,7 @@ spec:
       {{- end }}
       containers:
         - name: dnsmasq
-          image: {{ .Values.ironic.images.ironic_aio }}
+          image: {{ .Values.ironic.image.fullName }}
           command: ["/bin/rundnsmasq"]
           securityContext:
             privileged: true
@@ -112,7 +112,7 @@ spec:
                 subPath: dnsmasq.conf
               {{- end }}
         - name: httpd
-          image: {{ .Values.ironic.images.ironic_aio }}
+          image: {{ .Values.ironic.image.fullName }}
           command: ["/bin/runhttpd"]
           securityContext:
             privileged: true
@@ -145,7 +145,7 @@ spec:
                 subPath: dualboot.ipxe
               {{- end }}
         - name: mariadb
-          image: {{ .Values.ironic.images.ironic_aio }}
+          image: {{ .Values.ironic.image.fullName }}
           command: ["/bin/runmariadb"]
           securityContext:
             privileged: true
@@ -169,7 +169,7 @@ spec:
               subPath: my.cnf
               {{- end }}
         - name: ironic
-          image: {{ .Values.ironic.images.ironic_aio }}
+          image: {{ .Values.ironic.image.fullName }}
           command: ["/bin/runironic"]
           securityContext:
             privileged: true
@@ -192,7 +192,7 @@ spec:
               subPath: ironic.conf
             {{- end }}
         - name: ironic-inspector
-          image: {{ .Values.ironic.images.ironic_inspector }}
+          image: {{ .Values.ironic_inspector.image.fullName }}
           command: ["/bin/runironic-inspector"]
           securityContext:
             privileged: true
