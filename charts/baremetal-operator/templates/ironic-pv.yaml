@@ -1,3 +1,4 @@
+{{- if .Values.persistence.hostPath.enabled }}
 ---
 kind: PersistentVolume
 apiVersion: v1
@@ -9,12 +10,12 @@ metadata:
 spec:
   storageClassName: default
   capacity:
-    storage: {{ .Values.ironic.ironic_storage.volume_capacity }}
+    storage: {{ .Values.persistence.volume_capacity }}
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: {{ .Values.ironic.ironic_storage.hostPath }}
-
+    path: {{ .Values.persistence.hostPath.path }}
+{{- end }}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -22,9 +23,10 @@ metadata:
   name: ironic-pv-claim
   namespace: {{ .Values.namespace }}
 spec:
-  storageClassName: default
+
+  storageClassName: {{ .Values.persistence.storageClassName }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.ironic.ironic_storage.volume_capacity }}
+      storage: {{ .Values.persistence.volume_capacity }}

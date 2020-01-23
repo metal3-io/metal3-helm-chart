@@ -55,3 +55,10 @@ httpd:
   image:
     fullName: "quay.io/metal3-io/ironic:latest"
     pullPolicy: IfNotPresent
+
+persistence:
+  volume_capacity: 10Gi
+  hostPath:
+    enabled: true
+    path: "/opt/metal3-dev-env/ironic/"
+  storageClassName: "default"
