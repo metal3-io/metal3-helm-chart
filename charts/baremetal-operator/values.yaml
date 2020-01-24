@@ -18,7 +18,7 @@ ironic:
     automated_clean: true
     api_workers: '4'
     http_port: "80"
-    fast_track: true
+    fast_track: false
     ipv: "4"
   config_override:
     ironic: false
@@ -62,3 +62,11 @@ persistence:
     enabled: true
     path: "/opt/metal3-dev-env/ironic/"
   storageClassName: "default"
+init_bootstrap:
+  enabled: true
+  image:
+    fullName: "quay.io/metal3-io/ironic:latest"
+    pullPolicy: IfNotPresent
+  provisioning_files:
+    xenial-server-cloudimg-amd64-disk1.img: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img
+    ironic-python-agent.tar: https://images.rdoproject.org/train/rdo_trunk/current-tripleo/ironic-python-agent.tar

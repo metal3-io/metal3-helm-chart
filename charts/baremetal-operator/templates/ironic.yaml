@@ -81,9 +81,28 @@ spec:
             name: dualboot-ipxe-config
             defaultMode: 0644
         {{- end }}
+        {{- if .Values.init_bootstrap.enabled }}
+        - name: init-bootstrap
+          configMap:
+            name: init-bootstrap
+            defaultMode: 0700
+        {{- end }}
       {{- with .Values.ironic.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.init_bootstrap.enabled }}
+      initContainers:
+        - name: init-bootstrap
+          image: {{ .Values.init_bootstrap.image.fullName }}
+          imagePullPolicy: {{ .Values.init_bootstrap.image.pullPolicy }}
+          command: ['/bin/init-bootstrap']
+          volumeMounts:
+            - name: ironic-storage
+              mountPath: "/shared"
+            - name: init-bootstrap
+              mountPath: /bin/init-bootstrap
+              subPath: init-bootstrap
       {{- end }}
       containers:
         - name: dnsmasq
