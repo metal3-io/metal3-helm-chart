@@ -10,3 +10,6 @@ kubeadm:
   namespace: default
 baremetal-operator:
   namespace: default
+hardware-classification:
+  namespace: hcc-system
+  image: "quay.io/metal3-io/hardware-classification-controller:master"
