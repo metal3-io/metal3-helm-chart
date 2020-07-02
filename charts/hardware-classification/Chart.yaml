@@ -1,0 +1,4 @@
+apiVersion: v2
+name: hardware-classification
+description: Helm charts for Deployment of Hardware-classification-controller
+version: 0.1.0
