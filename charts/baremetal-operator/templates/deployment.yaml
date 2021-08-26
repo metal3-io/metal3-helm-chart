@@ -1,0 +1,176 @@
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ template "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: baremetal-operator
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    {{- if .Values.auth }}
+    checksum/auth: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+
+  {{- end }}
+spec:
+  replicas: {{ .Values.baremetalOperator.replicaCount }}
+  {{- if .Values.baremetalOperator.updateStrategy }}
+  strategy: {{- toYaml .Values.baremetalOperator.updateStrategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: baremetal-operator
+  template:
+    metadata:
+      {{- if .Values.baremetalOperator.podAnnotations }}
+      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: baremetal-operator
+        {{- if .Values.baremetalOperator.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.podLabels "context" $) | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ template "baremetalOperator.serviceAccountName" . }}
+      {{- include "baremetalOperator.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.baremetalOperator.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.baremetalOperator.affinity }}
+      affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.baremetalOperator.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.baremetalOperator.podAffinityPreset "component" "baremetal-operator" "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.baremetalOperator.podAntiAffinityPreset "component" "baremetal-operator" "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.baremetalOperator.nodeAffinityPreset.type "key" .Values.baremetalOperator.nodeAffinityPreset.key "values" .Values.baremetalOperator.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.baremetalOperator.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.baremetalOperator.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.baremetalOperator.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.tolerations "context" .) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.baremetalOperator.priorityClassName }}
+      priorityClassName: {{ .Values.baremetalOperator.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.baremetalOperator.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.baremetalOperator.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- if .Values.baremetalOperator.initContainers }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: manager
+          image: {{ template "baremetalOperator.image" . }}
+          imagePullPolicy: {{ .Values.baremetalOperator.image.pullPolicy }}
+          {{- if .Values.baremetalOperator.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.baremetalOperator.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.baremetalOperator.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.baremetalOperator.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if .Values.baremetalOperator.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ template "common.names.fullname" . }}-config
+            {{- if .Values.baremetalOperator.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.baremetalOperator.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.baremetalOperator.resources }}
+          resources: {{- toYaml .Values.baremetalOperator.resources | nindent 12 }}
+          {{- end }}
+          {{- if .Values.baremetalOperator.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.baremetalOperator.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- else if .Values.baremetalOperator.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.customLivenessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.baremetalOperator.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.baremetalOperator.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- else if .Values.baremetalOperator.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.customReadinessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.baremetalOperator.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- if .Values.baremetalOperator.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+        - name: kube-rbac-proxy
+          image: {{ template "baremetalOperator.kubeRBACProxy.image" . }}
+          imagePullPolicy: {{ .Values.kubeRBACProxy.image.pullPolicy }}
+          {{- if .Values.kubeRBACProxy.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.kubeRBACProxy.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.kubeRBACProxy.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.kubeRBACProxy.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.kubeRBACProxy.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.kubeRBACProxy.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            {{- if .Values.kubeRBACProxy.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.kubeRBACProxy.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.kubeRBACProxy.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.kubeRBACProxy.extraEnvVarsCM "context" $) }}
+            {{- end }}
+            {{- if .Values.kubeRBACProxy.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ include "common.tplvalues.render" (dict "value" .Values.kubeRBACProxy.extraEnvVarsSecret "context" $) }}
+            {{- end }}
+          {{- if .Values.kubeRBACProxy.resources }}
+          resources: {{- toYaml .Values.kubeRBACProxy.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- if .Values.auth }}
+            - name: ironic-credentials
+              mountPath: "/opt/metal3/auth/ironic"
+              readOnly: true
+          {{- end }}
+          {{- if .Values.kubeRBACProxy.extraVolumeMounts }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.kubeRBACProxy.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+          ports:
+          - containerPort: 8443
+            name: https
+        {{- if .Values.baremetalOperator.sidecars }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.baremetalOperator.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+        {{- if .Values.baremetalOperator.extraVolumes }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.auth }}
+        - name: ironic-credentials
+          secret:
+            secretName: {{ template "common.names.fullname" . }}-ironic-credentials
+        {{- end }}

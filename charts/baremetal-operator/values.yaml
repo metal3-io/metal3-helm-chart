@@ -1,24 +1,388 @@
-namespace: "metal3"
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
 
-operator:
-  ironic_api_url: "http://172.22.0.1:6385/v1/"
-  ironic_inspector_url: "http://172.22.0.1:5050/v1/"
-  deploy_kernel_url: "http://172.22.0.1/images/ironic-python-agent.kernel"
-  deploy_ramdisk_url: "http://172.22.0.1/images/ironic-python-agent.initramfs"
-  image: "quay.io/metal3-io/baremetal-operator:latest"
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry:
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass:
 
-ironic:
+## @section BMO Config parameters
+## @param config Configuration parameters for BMO
+
+config: {}
+  # DEPLOY_BOOTLOADER_URL: http://example.com/ipa.tar.gz!/esp.img
+  # DEPLOY_KERNEL_URL: http://example.com/ipa.tar.gz!/vmlinuz-5.4.0-26-generic
+  # DEPLOY_RAMDISK_URL: http://example.com/ipa.tar.gz!/initrd-5.4.0-26-generic.cgz
+  # IRONIC_ENDPOINT: https://ironic-api.example.com/v1/
+  # IRONIC_INSPECTOR_ENDPOINT: https://ironic-api.example.com/v1/
+
+
+## @param auth Configuration of Auth parameters for BMO
+auth: {}
+  # username: youruser
+  # password: yourpwd
+## @section Common parameters
+
+## @param kubeVersion Override Kubernetes version
+##
+kubeVersion:
+## @param nameOverride String to partially override common.names.fullname
+##
+nameOverride:
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride:
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+## @param clusterDomain Kubernetes cluster domain name
+##
+clusterDomain: cluster.local
+## @param extraDeploy Array of extra objects to deploy with the release
+##
+extraDeploy: []
+
+## @section Baremetal Operator  Parameters
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+baremetalOperator:
+  ## Bitnami %%MAIN_CONTAINER image
+  ## ref: https://hub.docker.com/r/bitnami/redis/tags/
+  ## @param baremetalOperator.image.registry Baremetal Operator  image registry
+  ## @param baremetalOperator.image.repository Baremetal Operator  image repository
+  ## @param baremetalOperator.image.tag Baremetal Operator  image tag (immutable tags are recommended)
+  ## @param baremetalOperator.image.pullPolicy Baremetal Operator  image pull policy
+  ## @param baremetalOperator.image.pullSecrets Baremetal Operator  image pull secrets
+  ## @param baremetalOperator.image.debug Enable Baremetal Operator  image debug mode
+  ##
+  image:
+    registry: quay.io
+    repository: metal3-io/baremetal-operator
+    tag: capm3-v0.5.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: Always
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+    ## Enable debug mode
+    ##
+    debug: false
+  ## @param baremetalOperator.replicaCount Number of Baremetal Operator replicas to deploy
+  ##
   replicaCount: 1
-  images:
-    ironic_aio: "quay.io/metal3-io/ironic:latest"
-    ironic_inspector: "quay.io/metal3-io/ironic-inspector:latest"
-  ironic_conf:
-    provisioning_interface: "provisioning"
-    dnsmasq_except_interface: "lo"
-    http_port: "80"
-    dhcp_range: "172.22.0.10,172.22.0.100"
-    mariadb_password: "e8ca990d79d351eacda0"
-  ironic_storage:
-    volume_capacity: 10Gi
-    hostPath: "/opt/metal3-dev-env/ironic/"
+  ## Configure extra options for Baremetal Operator containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param baremetalOperator.livenessProbe.enabled Enable livenessProbe on Baremetal Operator nodes
+  ## @param baremetalOperator.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param baremetalOperator.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @skip baremetalOperator.livenessProbe.httpGet.path
+  ## @skip baremetalOperator.livenessProbe.httpGet.port
+  ##
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /healthz
+      port: 9440
+    initialDelaySeconds: 3
+    periodSeconds: 3
+    # initialDelaySeconds: foo
+    # periodSeconds: bar
+    # timeoutSeconds: foo
+    # failureThreshold: bar
+    # successThreshold: foo
+  ## @param baremetalOperator.readinessProbe.enabled Enable readinessProbe on Baremetal Operator nodes
+  ##
+  readinessProbe:
+    enabled: false
+    # httpGet:
+    #   initialDelaySeconds: foo
+    #   periodSeconds: bar
+    #   timeoutSeconds: foo
+    #   failureThreshold: bar
+    #   successThreshold: foo
+  ## @param baremetalOperator.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param baremetalOperator.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## Baremetal Operator resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param baremetalOperator.resources.limits The resources limits for the Baremetal Operator containers
+  ## @param baremetalOperator.resources.requests The requested resources for the Baremetal Operator containers
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param baremetalOperator.podSecurityContext.enabled Enabled Baremetal Operator pods' Security Context
+  ## @param baremetalOperator.podSecurityContext.fsGroup Set Baremetal Operator pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: false
+    fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param baremetalOperator.containerSecurityContext.enabled Enabled Baremetal Operator containers' Security Context
+  ## @param baremetalOperator.containerSecurityContext.runAsUser Set Baremetal Operator containers' Security Context runAsUser
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+
+  ## @param baremetalOperator.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ##
+  existingConfigmap:
+  ## @param baremetalOperator.command Override default container command (useful when using custom images)
+  ##
+  command:
+    - /baremetal-operator
+  ## @param baremetalOperator.args Override default container args (useful when using custom images)
+  ##
+  args:
+    - --metrics-addr=127.0.0.1:8085
+    - --enable-leader-election
+  ## @param baremetalOperator.hostAliases Baremetal Operator pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param baremetalOperator.podLabels Extra labels for Baremetal Operator pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param baremetalOperator.podAnnotations Annotations for Baremetal Operator pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param baremetalOperator.podAffinityPreset Pod affinity preset. Ignored if `baremetalOperator.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param baremetalOperator.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `baremetalOperator.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node baremetalOperator.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param baremetalOperator.nodeAffinityPreset.type Node affinity preset type. Ignored if `baremetalOperator.affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param baremetalOperator.nodeAffinityPreset.key Node label key to match. Ignored if `baremetalOperator.affinity` is set
+    ##
+    key: ""
+    ## @param baremetalOperator.nodeAffinityPreset.values Node label values to match. Ignored if `baremetalOperator.affinity` is set
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param baremetalOperator.affinity Affinity for Baremetal Operator pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## NOTE: `baremetalOperator.podAffinityPreset`, `baremetalOperator.podAntiAffinityPreset`, and `baremetalOperator.nodeAffinityPreset` will be ignored when it's set
+  ##
+  affinity: {}
+  ## @param baremetalOperator.nodeSelector Node labels for Baremetal Operator pods assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
   nodeSelector: {}
+  ## @param baremetalOperator.tolerations Tolerations for Baremetal Operator pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  ## @param baremetalOperator.updateStrategy.type Baremetal Operator statefulset strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## StrategyType
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  ## @param baremetalOperator.priorityClassName Baremetal Operator pods' priorityClassName
+  ##
+  priorityClassName: ""
+  ## @param baremetalOperator.lifecycleHooks for the Baremetal Operator container(s) to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+  ## @param baremetalOperator.extraEnvVars Array with extra environment variables to add to Baremetal Operator nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param baremetalOperator.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for Baremetal Operator nodes
+  ##
+  extraEnvVarsCM:
+  ## @param baremetalOperator.extraEnvVarsSecret Name of existing Secret containing extra env vars for Baremetal Operator nodes
+  ##
+  extraEnvVarsSecret:
+  ## @param baremetalOperator.extraVolumes Optionally specify extra list of additional volumes for the Baremetal Operator pod(s)
+  ##
+  extraVolumes: []
+  ## @param baremetalOperator.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the Baremetal Operator container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param baremetalOperator.sidecars Add additional sidecar containers to the Baremetal Operator pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: {}
+  ## @param baremetalOperator.initContainers Add additional init containers to the Baremetal Operator pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: {}
+
+
+## @section Traffic Exposure Parameters
+
+## Baremetal Operator service parameters
+##
+service:
+  ## @param service.type Baremetal Operator service type
+  ##
+  type: ClusterIP
+
+  ## Node ports to expose
+  ## @param service.nodePorts.http Node port for HTTP
+  ## @param service.nodePorts.https Node port for HTTPS
+  ## NOTE: choose port between <30000-32767>
+  ##
+  nodePorts:
+    http:
+    https:
+  ## @param service.clusterIP Baremetal Operator service Cluster IP
+  ## e.g.:
+  ## clusterIP: None
+  ##
+  clusterIP:
+  ## @param service.loadBalancerIP Baremetal Operator service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  ##
+  loadBalancerIP:
+  ## @param service.loadBalancerSourceRanges Baremetal Operator service Load Balancer sources
+  ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ##   - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: []
+  ## @param service.externalTrafficPolicy Baremetal Operator service external traffic policy
+  ## ref http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.annotations Additional custom annotations for Baremetal Operator service
+  ##
+  annotations: {}
+
+## @section Kube RBAC Proxy Container Parameters
+## @param kubeRBACProxy.enabled Enable/disable KubeRBACProxy
+
+kubeRBACProxy:
+  enabled: true
+  ## Bitnami Shell image
+  ## ref: https://hub.docker.com/r/bitnami/bitnami-shell/tags/
+  ## @param kubeRBACProxy.image.registry Bitnami Shell image registry
+  ## @param kubeRBACProxy.image.repository Bitnami Shell image repository
+  ## @param kubeRBACProxy.image.tag Bitnami Shell image tag (immutable tags are recommended)
+  ## @param kubeRBACProxy.image.pullPolicy Bitnami Shell image pull policy
+  ## @param kubeRBACProxy.image.pullSecrets Bitnami Shell image pull secrets
+  ##
+  image:
+    registry: gcr.io
+    repository: kubebuilder/kube-rbac-proxy
+    tag: "v0.8.0"
+    pullPolicy: Always
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param kubeRBACProxy.args Override default container args (useful when using custom images)
+  ##
+  args:
+    - --secure-listen-address=0.0.0.0:8443
+    - --upstream=http://127.0.0.1:8085/
+    - --logtostderr=true
+    - --v=10
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param kubeRBACProxy.resources.limits The resources limits for the init container
+  ## @param kubeRBACProxy.resources.requests The requested resources for the init container
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param kubeRBACProxy.containerSecurityContext.enabled Enable/disable container's Security Context 
+
+  ## @param kubeRBACProxy.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+
+## @section Other Parameters
+
+## RBAC configuration
+##
+rbac:
+  ## @param rbac.create Specifies whether RBAC resources should be created
+  ##
+  create: true
+
+## ServiceAccount configuration
+##
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a ServiceAccount should be created
+  ##
+  create: true
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
+

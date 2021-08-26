@@ -1,0 +1,3 @@
+** Please be patient while the chart is being deployed **
+
+{{- include "common.warnings.rollingTag" .Values.baremetalOperator.image }}

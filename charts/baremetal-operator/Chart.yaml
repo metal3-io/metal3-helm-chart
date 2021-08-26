@@ -1,4 +1,20 @@
-apiVersion: v1
+
+apiVersion: v2
+appVersion: v0.5.0
+dependencies:
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 1.x.x
+description: Chart for Baremetal Operator
+engine: gotpl
+home: https://github.com/metal3-io/baremetal-operator
+maintainers:
+  - email: maximilian.rink@telekom.de
+    name: Maximilian Rink
 name: baremetal-operator
-description: baremetal-operator + ironic-aio
-version: 0.1.0
+sources:
+  - https://github.com/metal3-io/baremetal-operator
+  - https://github.com/metal3-io/metal3-helm-chart
+version: 0.2.0
