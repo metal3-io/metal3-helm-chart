@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ironicStandalone.api.fullname" . }}
+  {{- with .Values.api.service_annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.api.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ include "ironicStandalone.name" . }}
+    component: {{ .Values.api.name }}
+    release: {{ .Release.Name }}
+  type: {{ .Values.api.service_type }}
+  ports:
+    - name: ironic-api
+      port: {{ .Values.api.portExternal }}
+      targetPort: {{ .Values.api.portInternal }}
+  {{- if .Values.api.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.api.loadBalancerIP }}
+  {{- end }}
+  {{- with .Values.api.externalIPs }}
+  externalIPs:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+

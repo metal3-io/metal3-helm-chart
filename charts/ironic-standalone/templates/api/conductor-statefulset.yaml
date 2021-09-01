@@ -1,0 +1,201 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ironicStandalone.conductor.fullname" . }}
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.conductor.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  serviceName: {{ include "ironicStandalone.conductor.fullname" . }}
+  replicas: {{ .Values.conductor.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "ironicStandalone.name" . }}
+      component: {{ .Values.conductor.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "ironicStandalone.name" . }}
+        component: {{ .Values.conductor.name }}
+        release: {{ .Release.Name }}
+      name: {{ include "ironicStandalone.conductor.fullname" . }}
+      annotations:
+        configmap-etc-hash: {{ include (print $.Template.BasePath "/common/etc-configmap.yaml") . | sha256sum }}
+    spec:
+      hostNetwork: {{ .Values.conductor.hostNetwork }}
+      {{- if .Values.conductor.hostNetwork }}
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      containers:
+        - name: {{ include "ironicStandalone.conductor.fullname" . }}
+          image: "{{ .Values.image.name }}:{{ .Values.image.version }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          securityContext:
+            privileged: {{ .Values.conductor.privileged }}
+        {{- with .Values.conductor.resources }}
+          resources:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - mako-render /etc/ironic/ironic.conf.mako >/tmp/ironic.conf; /usr/bin/ironic-conductor --config-file /tmp/ironic.conf
+          env:
+            - name: IRONIC_URL
+              value: "{{ include "ironicStandalone.api.fullname" . }}:{{ .Values.api.portExternal }}/"
+            {{- if .Values.rabbitmq.enabled }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-rabbitmq
+                  key: rabbitmq-password
+            {{- end }}
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mariadb
+                  {{- if .Values.mariadb.auth.username }}
+                  key: mariadb-password
+                  {{- else }}
+                  key: mariadb-root-password
+                  {{- end }}
+#          livenessProbe:
+#            exec:
+#              command:
+#                - /bin/bash
+#                - -c
+#                - ironic driver-list | grep "$HOSTNAME"
+#            initialDelaySeconds: 30
+#            timeoutSeconds: 10
+          volumeMounts:
+            {{- if .Values.tftp.persistence.enabled }}
+            - mountPath: /storage
+              name: ironic
+            {{- end }}
+            - mountPath: /etc/ironic
+              name: ironic-etc
+              readOnly: true
+            {{- if .Values.conductor.privileged }}
+            - mountPath: /sys
+              name: host-sys
+            - mountPath: /dev
+              name: host-dev
+            - mountPath: /lib/modules
+              name: host-lib-modules
+              readOnly: True
+            {{- end }}
+      initContainers:
+        {{- if .Values.tftp.persistence.enabled }}
+        - name: storage-dir-permissions
+          image: "{{ .Values.image.name }}:{{ .Values.image.version }}"
+          command: ["/bin/bash"]
+          args: ["-c", "chown -R ironic:ironic /storage/httpboot /storage/tftpboot /storage/mgmt-scripts; chmod 1777 /storage/*; chown 1001 /mnt/mariadb"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /storage/httpboot
+              name: ironic
+              subPath: httpboot
+            - mountPath: /storage/tftpboot
+              name: ironic
+              subPath: tftpboot
+            - mountPath: /storage/mgmt-scripts
+              name: ironic
+              subPath: mgmt-scripts
+            - mountPath: /mnt/mariadb
+              name: ironic
+              subPath: "{{ .Values.mariadb.primary.persistence.subPath }}"
+        {{- end }}
+        - name: wait-for-mariadb
+          image: "{{ .Values.waitForDB.name }}:{{ .Values.waitForDB.version }}"
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - /tmp/wait-for-mariadb.sh
+          env:
+            - name: DB_HOST
+              value: "{{ template "ironicStandalone.database.host" . }}"
+            - name: DB_NAME
+              value: "{{ template "ironicStandalone.database.name" . }}"
+            - name: DB_USER
+              value: "{{ template "ironicStandalone.database.username" . }}"
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mariadb
+                  {{- if .Values.mariadb.auth.username }}
+                  key: mariadb-password
+                  {{- else }}
+                  key: mariadb-root-password
+                  {{- end }}
+          volumeMounts:
+            - mountPath: /tmp/wait-for-mariadb.sh
+              name: ironic-scripts
+              subPath: wait-for-mariadb.sh
+              readOnly: true
+        - name: update-database-schema
+          image: "{{ .Values.image.name }}:{{ .Values.image.version }}"
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - mako-render /etc/ironic/ironic.conf.mako >/tmp/ironic.conf; /usr/bin/ironic-dbsync --config-file /tmp/ironic.conf upgrade
+          env:
+            - name: API_PORT_INTERNAL
+              value: {{ .Values.api.portInternal | quote }}
+            {{- if .Values.rabbitmq.enabled }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-rabbitmq
+                  key: rabbitmq-password
+            {{- end }}
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mariadb
+                  {{- if .Values.mariadb.auth.username }}
+                  key: mariadb-password
+                  {{- else }}
+                  key: mariadb-root-password
+                  {{- end }}
+          volumeMounts:
+            - mountPath: /etc/ironic
+              name: ironic-etc
+              readOnly: true
+      volumes:
+        - name: ironic-etc
+          configMap:
+            name: {{ include "ironicStandalone.name" . }}-etc
+            defaultMode: 0644
+        - name: ironic-scripts
+          configMap:
+            name: {{ include "ironicStandalone.name" . }}-scripts
+            defaultMode: 0755
+        {{- if .Values.tftp.persistence.enabled }}
+        - name: ironic
+          persistentVolumeClaim:
+            {{- if .Values.persistentVolumeClaimName }}
+            claimName: {{ .Values.persistentVolumeClaimName | quote }}
+            {{- else }}
+            claimName: {{ ( include "ironicStandalone.tftp.fullname" . ) | quote }}
+            {{- end }}
+        {{- end }}
+        {{- if .Values.conductor.privileged }}
+        - name: host-dev
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: host-lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: host-sys
+          hostPath:
+            path: /sys
+        {{- end }}

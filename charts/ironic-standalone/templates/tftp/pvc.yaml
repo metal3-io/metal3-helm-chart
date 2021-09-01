@@ -1,0 +1,28 @@
+{{- if and .Values.tftp.persistence.enabled (not $.Values.persistentVolumeClaimName) }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: 
+  name: {{ include "ironicStandalone.tftp.fullname" . }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+{{- with .Values.tftp.persistence.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  accessModes:
+    - {{ .Values.tftp.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.tftp.persistence.size | quote }}
+{{- if .Values.tftp.persistence.storageClass }}
+{{- if (eq "-" .Values.tftp.persistence.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: {{ .Values.tftp.persistence.storageClass | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

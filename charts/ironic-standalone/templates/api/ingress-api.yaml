@@ -1,0 +1,60 @@
+{{- if .Values.api.ingress.enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "common.names.fullname" . }}-api
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: ironic-api
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.api.ingress.annotations .Values.commonAnnotations .Values.api.ingress.certManager }}
+  annotations:
+    {{- if .Values.api.ingress.certManager }}
+    kubernetes.io/tls-acme: "true"
+    {{- end }}
+    {{- if .Values.api.ingress.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.api.ingress.annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  rules:
+    {{- if .Values.api.ingress.hostname }}
+    - host: {{ .Values.api.ingress.hostname }}
+      http:
+        paths:
+          {{- if .Values.api.ingress.extraPaths }}
+          {{- toYaml .Values.api.ingress.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.api.ingress.path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
+            pathType: {{ .Values.api.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "ironicStandalone.api.fullname" .) "servicePort" "ironic-api" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.api.ingress.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "ironicStandalone.api.fullname" $) "servicePort" "ironic-api" "context" $) | nindent 14 }}
+    {{- end }}
+  {{- if or (and .Values.api.ingress.tls (or .Values.api.ingress.certManager .Values.api.ingress.selfSigned)) .Values.api.ingress.extraTls }}
+  tls:
+    {{- if and .Values.api.ingress.tls (or .Values.api.ingress.certManager .Values.api.ingress.selfSigned) }}
+    - hosts:
+        - {{ .Values.api.ingress.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.api.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.api.ingress.extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.api.ingress.extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,26 @@
+apiVersion: v2
+name: ironic-standalone
+version: 1.1.26
+appVersion: wallaby
+description: Openstack Ironic chart for Kubernetes
+home: https://docs.openstack.org/ironic/latest/
+engine: gotpl
+maintainers:
+  - name: jakub-d
+    email: jakub.dlugolecki@gmail.com
+  - name: MaxRink
+    email: maximilian.rink@telekom.de
+dependencies:
+  - name: mariadb
+    version: "9.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: mariadb.enabled
+  - name: rabbitmq
+    version: "8.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: rabbitmq.enabled
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 1.x.x

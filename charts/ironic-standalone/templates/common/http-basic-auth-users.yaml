@@ -1,0 +1,18 @@
+{{- if eq (.Values.config.DEFAULT.auth_strategy | default "default") "http_basic" -}}
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ include "ironicStandalone.name" . }}-http-basic-auth
+  labels:
+    app.kubernetes.io/name: {{ include "ironicStandalone.name" $ }}
+    helm.sh/chart: {{ include "ironicStandalone.chart" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+stringData:
+  htpasswd: |
+    {{- range $i := .Values.basicAuth.credentials }}
+    {{ htpasswd $i.username $i.password }}
+    {{- end }}
+{{- end -}}

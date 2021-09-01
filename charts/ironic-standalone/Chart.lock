@@ -1,0 +1,12 @@
+dependencies:
+- name: mariadb
+  repository: https://charts.bitnami.com/bitnami
+  version: 9.3.17
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 8.18.1
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 1.7.0
+digest: sha256:a35e76d0c608a97a199eb1ac37671b6bf6451ba25ffb117152ccf2d41e1cb9d8
+generated: "2021-07-23T01:27:38.298041787+02:00"

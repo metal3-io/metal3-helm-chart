@@ -1,0 +1,15 @@
+{{- if .Values.httpboot.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ironicStandalone.httpboot.fullname" . }}
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.httpboot.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+data:
+ nginx.conf: |
+{{ include (print .Template.BasePath "/etc/_nginx.conf.tpl") . | indent 4 }}
+{{- end }}

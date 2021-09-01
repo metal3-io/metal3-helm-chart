@@ -1,0 +1,16 @@
+# Common backup files
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+# Various IDEs
+.project
+.idea/
+*.tmproj
+.vscode/
+# Packaged helm chart
+*.tgz
+
+# Downloaded files
+deploy-helm-chart.sh

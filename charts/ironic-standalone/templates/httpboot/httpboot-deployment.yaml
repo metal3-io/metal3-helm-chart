@@ -1,0 +1,65 @@
+{{- if .Values.httpboot.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.httpboot.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ include "ironicStandalone.httpboot.fullname" . }}
+spec:
+  replicas: {{ .Values.httpboot.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "ironicStandalone.name" . }}
+      component: "{{ .Values.httpboot.name }}"
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "ironicStandalone.name" . }}
+        component: "{{ .Values.httpboot.name }}"
+        release: {{ .Release.Name }}
+      name: {{ include "ironicStandalone.httpboot.fullname" . }}
+      annotations:
+        configmap-etc-hash: {{ include (print $.Template.BasePath "/httpboot/httpboot-configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: {{ include "ironicStandalone.httpboot.fullname" . }}
+        image:  "{{ .Values.httpboot.image.name }}:{{ .Values.httpboot.image.version }}"
+      {{- with .Values.httpboot.resources }}
+        resources:
+{{ toYaml . | indent 10 }}
+      {{- end }}
+        ports:
+        - name: ironic-httpboot
+          containerPort: {{ .Values.httpboot.portInternal }}
+        volumeMounts:
+        - mountPath: /etc/nginx/nginx.conf
+          name: nginx-conf
+          subPath: nginx.conf
+          readOnly: true
+        - mountPath: /var/www
+          name: ironic
+          subPath: httpboot
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: {{ include "ironicStandalone.httpboot.fullname" . }}
+          defaultMode: 0644
+      - name: ironic
+        persistentVolumeClaim:
+          {{- if .Values.persistentVolumeClaimName }}
+          claimName: {{ .Values.persistentVolumeClaimName | quote }}
+          {{- else }}
+          claimName: {{ ( include "ironicStandalone.tftp.fullname" . ) | quote }}
+          {{- end }}
+{{- end }}

@@ -1,0 +1,60 @@
+{{- if .Values.keystone.ingress.enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "common.names.fullname" . }}-keystone
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: ironic-keystone
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.keystone.ingress.annotations .Values.commonAnnotations .Values.keystone.ingress.certManager }}
+  annotations:
+    {{- if .Values.keystone.ingress.certManager }}
+    kubernetes.io/tls-acme: "true"
+    {{- end }}
+    {{- if .Values.keystone.ingress.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.keystone.ingress.annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  rules:
+    {{- if .Values.keystone.ingress.hostname }}
+    - host: {{ .Values.keystone.ingress.hostname }}
+      http:
+        paths:
+          {{- if .Values.keystone.ingress.extraPaths }}
+          {{- toYaml .Values.keystone.ingress.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.keystone.ingress.path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
+            pathType: {{ .Values.keystone.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "ironicStandalone.keystone.fullname" .) "servicePort" "keystone" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.keystone.ingress.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "ironicStandalone.keystone.fullname" $) "servicePort" "keystone" "context" $) | nindent 14 }}
+    {{- end }}
+  {{- if or (and .Values.keystone.ingress.tls (or .Values.keystone.ingress.certManager .Values.keystone.ingress.selfSigned)) .Values.keystone.ingress.extraTls }}
+  tls:
+    {{- if and .Values.keystone.ingress.tls (or .Values.keystone.ingress.certManager .Values.keystone.ingress.selfSigned) }}
+    - hosts:
+        - {{ .Values.keystone.ingress.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.keystone.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.keystone.ingress.extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.keystone.ingress.extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

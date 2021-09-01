@@ -1,0 +1,85 @@
+{{- if .Values.mgmt.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ironicStandalone.mgmt.fullname" . }}
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.mgmt.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "ironicStandalone.name" . }}
+      component: {{ .Values.mgmt.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "ironicStandalone.name" . }}
+        component: {{ .Values.mgmt.name }}
+        release: {{ .Release.Name }}
+      name: {{ include "ironicStandalone.mgmt.fullname" . }}
+      annotations:
+        configmap-etc-hash: {{ include (print $.Template.BasePath "/common/etc-configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: {{ include "ironicStandalone.mgmt.fullname" . }}
+          image: "{{ .Values.image.name }}:{{ .Values.image.version }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          command: [ "{{ .Values.mgmt.pod_command }}" ]
+          args: [ "{{ .Values.mgmt.pod_args }}" ]
+          env:
+{{- if .Values.keystone.enabled }}
+            - name: OS_USERNAME
+              value: "{{ .Values.keystone.ironic_user }}"
+            - name: OS_PROJECT_NAME
+              value: "{{ .Values.keystone.ironic_project_name }}"
+            - name: OS_IDENTITY_API_VERSION
+              value: "3"
+            - name: OS_AUTH_URL
+              value: "http://{{include "ironicStandalone.keystone.fullname" .}}:{{ .Values.keystone.portExternal }}/v3/"
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-keystone
+                  key: ironic_password
+{{- else }}
+            - name: OS_AUTH_TYPE
+              value: "none"
+{{- end }}
+            - name: OS_ENDPOINT
+              value: "http://{{ include "ironicStandalone.api.fullname" . }}:{{ .Values.api.portExternal }}/"
+            - name: IRONIC_API_VERSION
+              value: latest
+            - name: IRONIC_URL
+              value: "http://{{ include "ironicStandalone.api.fullname" . }}:{{ .Values.api.portExternal }}/"
+            - name: OS_URL
+              value: "http://{{ include "ironicStandalone.api.fullname" . }}:{{ .Values.api.portExternal }}/"
+{{- if .Values.mgmt.extra_env }}
+{{ toYaml .Values.mgmt.extra_env | indent 12 }}
+{{- end }}
+          volumeMounts:
+            - mountPath: /storage
+              name: ironic
+            - mountPath: /mnt/mgmt-scripts
+              name: ironic
+              subPath: mgmt-scripts
+            - mountPath: /etc/ironic
+              name: ironic-etc
+              readOnly: true
+      volumes:
+        - name: ironic
+          persistentVolumeClaim:
+            {{- if .Values.persistentVolumeClaimName }}
+            claimName: {{ .Values.persistentVolumeClaimName | quote }}
+            {{- else }}
+            claimName: {{ ( include "ironicStandalone.tftp.fullname" . ) | quote }}
+            {{- end }}
+        - name: ironic-etc
+          configMap:
+            name: {{ include "ironicStandalone.name" . }}-etc
+{{- end }}

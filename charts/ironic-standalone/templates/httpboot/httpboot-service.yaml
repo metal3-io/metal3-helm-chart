@@ -1,0 +1,34 @@
+{{- if .Values.httpboot.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ironicStandalone.httpboot.fullname" . }}
+  {{- with .Values.httpboot.service_annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.httpboot.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ include "ironicStandalone.name" . }}
+    component: {{ .Values.httpboot.name }}
+    release: {{ .Release.Name }}
+  type: {{ .Values.httpboot.service_type }}
+  ports:
+  - name: ironic-httpboot
+    port: {{ .Values.httpboot.portExternal }}
+    targetPort: {{ .Values.httpboot.portInternal }}
+    protocol: TCP
+  {{- if .Values.httpboot.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.httpboot.loadBalancerIP }}
+  {{- end }}
+  {{- with .Values.httpboot.externalIPs }}
+  externalIPs:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+{{- end }}

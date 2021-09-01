@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ironicStandalone.api.fullname" . }}
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.api.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "ironicStandalone.name" . }}
+      component: {{ .Values.api.name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      name: {{ include "ironicStandalone.api.fullname" . }}
+      labels:
+        app: {{ include "ironicStandalone.name" . }}
+        component: {{ .Values.api.name }}
+        release: {{ .Release.Name }}
+      annotations:
+        configmap-etc-hash: {{ include (print $.Template.BasePath "/common/etc-configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: {{ include "ironicStandalone.api.fullname" . }}
+          image: "{{ .Values.image.name }}:{{ .Values.image.version }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        {{- with .Values.api.resources }}
+          resources:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - mako-render /etc/ironic/ironic.conf.mako >/tmp/ironic.conf; /usr/bin/ironic-api --config-file /tmp/ironic.conf
+          env:
+            - name: API_PORT_INTERNAL
+              value: {{ .Values.api.portInternal | quote }}
+            {{- if .Values.config.DEFAULT.debug}}
+
+            - name: OS_ENDPOINT
+              value: "http://localhost:8080/"
+            {{- end }}
+            {{- if .Values.rabbitmq.enabled }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-rabbitmq
+                  key: rabbitmq-password
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-rabbitmq
+                  key: rabbitmq-erlang-cookie
+            {{- end }}
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-mariadb
+                  {{- if .Values.mariadb.auth.username }}
+                  key: mariadb-password
+                  {{- else }}
+                  key: mariadb-root-password
+                  {{- end }}
+            {{- if eq (.Values.config.DEFAULT.auth_strategy | default "default") "http_basic" }}
+            - name: OS_AUTH_TYPE
+              value: "http_basic"
+            - name: OS_USERNAME
+              value: "{{ ( first  .Values.basicAuth.credentials ).username }}"
+            - name: OS_PASSWORD
+              value: "{{ ( first  .Values.basicAuth.credentials ).password }}"
+            {{- else }}
+            - name: OS_AUTH_TYPE
+              value: "none"
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.api.portInternal }}
+            initialDelaySeconds: 15
+            timeoutSeconds: 5
+          ports:
+            - name: ironic-api
+              containerPort: {{ .Values.api.portInternal }}
+          volumeMounts:
+            - mountPath: /etc/ironic
+              name: ironic-etc
+              readOnly: true
+            {{- if eq (.Values.config.DEFAULT.auth_strategy | default "default") "http_basic" }}
+            - mountPath: /etc/ironic/auth
+              name: ironic-basic-auth
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: ironic-etc
+          configMap:
+            name: {{ include "ironicStandalone.name" . }}-etc
+            defaultMode: 0644
+        {{- if eq (.Values.config.DEFAULT.auth_strategy | default "default") "http_basic" }}
+        - name: ironic-basic-auth
+          secret:
+            secretName: {{ include "ironicStandalone.name" . }}-http-basic-auth
+            defaultMode: 0644
+        {{- end }}

@@ -1,0 +1,33 @@
+{{- if .Values.keystone.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ironicStandalone.keystone.fullname" . }}
+  {{- with .Values.keystone.service_annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "ironicStandalone.name" . }}
+    chart: {{ include "ironicStandalone.chart" . }}
+    component: {{ .Values.keystone.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    app: {{ include "ironicStandalone.name" . }}
+    component: {{ .Values.keystone.name }}
+    release: {{ .Release.Name }}
+  type: {{ .Values.keystone.service_type }}
+  ports:
+    - name: keystone
+      port: {{ .Values.keystone.portExternal }}
+      targetPort: {{ .Values.keystone.portInternal }}
+  {{- if .Values.keystone.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.keystone.loadBalancerIP }}
+  {{- end }}
+  {{- with .Values.keystone.externalIPs }}
+  externalIPs:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+{{- end }}

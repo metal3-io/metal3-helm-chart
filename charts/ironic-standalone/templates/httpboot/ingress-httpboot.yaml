@@ -1,0 +1,60 @@
+{{- if .Values.httpboot.ingress.enabled }}
+apiVersion: {{ include "common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: {{ template "common.names.fullname" . }}-httpboot
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: ironic-httpboot
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.httpboot.ingress.annotations .Values.commonAnnotations .Values.httpboot.ingress.certManager }}
+  annotations:
+    {{- if .Values.httpboot.ingress.certManager }}
+    kubernetes.io/tls-acme: "true"
+    {{- end }}
+    {{- if .Values.httpboot.ingress.annotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.httpboot.ingress.annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  rules:
+    {{- if .Values.httpboot.ingress.hostname }}
+    - host: {{ .Values.httpboot.ingress.hostname }}
+      http:
+        paths:
+          {{- if .Values.httpboot.ingress.extraPaths }}
+          {{- toYaml .Values.httpboot.ingress.extraPaths | nindent 10 }}
+          {{- end }}
+          - path: {{ .Values.httpboot.ingress.path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
+            pathType: {{ .Values.httpboot.ingress.pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "ironicStandalone.httpboot.fullname" .) "servicePort" "ironic-httpboot" "context" $)  | nindent 14 }}
+    {{- end }}
+    {{- range .Values.httpboot.ingress.extraHosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+          - path: {{ default "/" .path }}
+            {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
+            pathType: {{ default "ImplementationSpecific" .pathType }}
+            {{- end }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "ironicStandalone.httpboot.fullname" $) "servicePort" "ironic-httpboot" "context" $) | nindent 14 }}
+    {{- end }}
+  {{- if or (and .Values.httpboot.ingress.tls (or .Values.httpboot.ingress.certManager .Values.httpboot.ingress.selfSigned)) .Values.httpboot.ingress.extraTls }}
+  tls:
+    {{- if and .Values.httpboot.ingress.tls (or .Values.httpboot.ingress.certManager .Values.httpboot.ingress.selfSigned) }}
+    - hosts:
+        - {{ .Values.httpboot.ingress.hostname | quote }}
+      secretName: {{ printf "%s-tls" .Values.httpboot.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.httpboot.ingress.extraTls }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.httpboot.ingress.extraTls "context" $) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
