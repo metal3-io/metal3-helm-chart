@@ -33,6 +33,8 @@ auth: {}
   # password: yourpwd
 ## @section Common parameters
 
+watchNamespace: false
+
 ## @param kubeVersion Override Kubernetes version
 ##
 kubeVersion:
@@ -284,7 +286,7 @@ service:
   ## @param service.nodePorts.http Node port for HTTP
   ## @param service.nodePorts.https Node port for HTTPS
   ## NOTE: choose port between <30000-32767>
-  ##
+  ## 
   nodePorts:
     http:
     https:
@@ -355,8 +357,7 @@ kubeRBACProxy:
     requests: {}
   ## Init container Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-    ## @param kubeRBACProxy.containerSecurityContext.enabled Enable/disable container's Security Context 
-
+  ## @param kubeRBACProxy.containerSecurityContext.enabled Enable/disable container's Security Context 
   ## @param kubeRBACProxy.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
   ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
   ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`

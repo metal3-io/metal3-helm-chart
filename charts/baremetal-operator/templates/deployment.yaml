@@ -90,6 +90,10 @@ spec:
             {{- if .Values.baremetalOperator.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
+            {{- if .Values.watchNamespace }}
+            - name: WATCH_NAMESPACE
+              value: {{ .Values.watchNamespace }}
+            {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ template "common.names.fullname" . }}-config
@@ -118,6 +122,11 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           volumeMounts:
+          {{- if .Values.auth }}
+            - name: ironic-credentials
+              mountPath: "/opt/metal3/auth/ironic"
+              readOnly: true
+          {{- end }}
           {{- if .Values.baremetalOperator.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
@@ -150,11 +159,6 @@ spec:
           resources: {{- toYaml .Values.kubeRBACProxy.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
-          {{- if .Values.auth }}
-            - name: ironic-credentials
-              mountPath: "/opt/metal3/auth/ironic"
-              readOnly: true
-          {{- end }}
           {{- if .Values.kubeRBACProxy.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.kubeRBACProxy.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}

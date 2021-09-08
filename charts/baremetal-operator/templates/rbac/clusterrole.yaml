@@ -2,7 +2,7 @@
 kind: ClusterRole
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 metadata:
-  name: {{ template "common.names.fullname" . }}-manager-role
+  name: {{ .Release.Namespace }}-{{ template "common.names.fullname" . }}-manager-role
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: baremetal-operator
     {{- if .Values.commonLabels }}
@@ -56,7 +56,7 @@ rules:
 kind: ClusterRole
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 metadata:
-  name: {{ template "common.names.fullname" . }}-metrics-reader
+  name: {{ .Release.Namespace }}-{{ template "common.names.fullname" . }}-metrics-reader
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: baremetal-operator
     {{- if .Values.commonLabels }}
@@ -75,7 +75,7 @@ rules:
 kind: ClusterRole
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 metadata:
-  name: {{ template "common.names.fullname" . }}-proxy-role
+  name: {{ .Release.Namespace }}-{{ template "common.names.fullname" . }}-proxy-role
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: baremetal-operator
     {{- if .Values.commonLabels }}
