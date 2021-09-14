@@ -1,6 +1,6 @@
 apiVersion: v2
 name: ironic-standalone
-version: 1.1.26
+version: 1.1.27
 appVersion: wallaby
 description: Openstack Ironic chart for Kubernetes
 home: https://docs.openstack.org/ironic/latest/
@@ -10,7 +10,7 @@ maintainers:
     email: jakub.dlugolecki@gmail.com
   - name: MaxRink
     email: maximilian.rink@telekom.de
-dependencies:
+  dependencies:
   - name: mariadb
     version: "9.x.x"
     repository: "https://charts.bitnami.com/bitnami"

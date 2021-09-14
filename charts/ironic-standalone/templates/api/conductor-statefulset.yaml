@@ -73,6 +73,9 @@ spec:
 #            initialDelaySeconds: 30
 #            timeoutSeconds: 10
           volumeMounts:
+            {{- if .Values.conductor.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.conductor.extraVolumeMounts "context" $) | nindent 12 }}
+            {{- end }}
             {{- if .Values.tftp.persistence.enabled }}
             - mountPath: /storage
               name: ironic
@@ -178,6 +181,9 @@ spec:
           configMap:
             name: {{ include "ironicStandalone.name" . }}-scripts
             defaultMode: 0755
+        {{- if .Values.extraVolumes }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
+        {{- end }}
         {{- if .Values.tftp.persistence.enabled }}
         - name: ironic
           persistentVolumeClaim:

@@ -162,6 +162,7 @@ round-robin record or simply by aiming directly at k8s node address.
 
 Changelog
 =========
+1.1.27 - Added support for extraVolumes and extraVolumeMounts on the conductor.
 1.1.0 - Add optional Keystone service
 1.0.0 - Migrate MySQL to Mariadb, enable Train release
 

@@ -536,6 +536,10 @@ conductor:
       memory: "8G"
       cpu: "8"
 
+  ## @param extraVolumeMounts Array to add extra mount
+  ##
+  extraVolumeMounts: []
+
 mariadb:
   enabled: true
   auth:
@@ -554,6 +558,10 @@ mariadb:
       cpu: 100m
   metrics:
     enabled: true
+
+## @param extraVolumes Array to add extra volumes
+##
+extraVolumes: []
 
 ## If the MariaDB database included in the chart is disabled, Ironic will
 ## use below parameters to connect to an external MariaDB/MySQL server.
