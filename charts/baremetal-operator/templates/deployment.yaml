@@ -9,13 +9,8 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
   annotations:
-    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-    {{- if .Values.auth }}
-    checksum/auth: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
-    {{- end }}
   {{- if .Values.commonAnnotations }}
   {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-
   {{- end }}
 spec:
   replicas: {{ .Values.baremetalOperator.replicaCount }}
@@ -27,8 +22,16 @@ spec:
       app.kubernetes.io/component: baremetal-operator
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.auth }}
+        checksum/auth: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
       {{- if .Values.baremetalOperator.podAnnotations }}
-      annotations: {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.podAnnotations "context" $) | nindent 8 }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.baremetalOperator.podAnnotations "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.commonAnnotations }}      
+      {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 8 }}
       {{- end }}
       labels: {{- include "common.labels.standard" . | nindent 8 }}
         app.kubernetes.io/component: baremetal-operator
